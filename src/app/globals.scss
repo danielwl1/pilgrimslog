@@ -4,7 +4,6 @@
 
 :root {
     --size-map-small: 100px;
-    --size-tooltip: 50px;
     --size-map-large: 500px;
     --size-map-home:300px;
     --fraction-tooltip: 80%;
@@ -104,31 +103,8 @@
     border-radius: 12px;
     box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);
     border-top: none;
-    transition: all 1s ease-out;
+    transition: height 0.4s cubic-bezier(0.32, 0.72, 0, 1);
     background-color: var(--color-plog-neutral);
-
-    .opener {
-        position: absolute;
-        transform: translate(-50%, 0%);
-        top: -5px;
-        left: 50%;
-        background: var(--color-plog-neutral);
-        border-radius: 3px;
-        padding-top: 5px;
-        width: 30px;
-        height: 30px;
-        transition: all 1s ease-out;
-        opacity: 1;
-
-        &.home {
-            opacity: 0;
-        }
-
-        &.open {
-            width: 40px;
-            height: 40px;
-        }
-    }
 
     &.expanded {
         box-shadow: 0px -10px 10px 0px var(--color-plog-accent);
@@ -139,55 +115,49 @@
         box-shadow: none;
     }
 
+    .map-description {
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 12px;
+        overflow: hidden;
+        opacity: 1;
+        transition:
+            opacity 0.4s ease-out,
+            height 0.4s ease-out,
+            transform 0.4s ease-out;
+
+        .day,
+        .km {
+            font-size: 20px;
+            font-weight: bold;
+            white-space: nowrap;
+            color: var(--color-plog-normal);
+        }
+
+        // Closed state: tucked up behind the map, ready to slide down.
+        &.is-collapsed {
+            height: 0;
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        &.empty {
+            opacity: 0;
+        }
+    }
+
     .mapcontainer {
         position: relative;
         transition: all 1s ease-out;
 
-        .description {
-            position: absolute;
-            left: 0;
-            height: var(--size-map-small);
-            padding: '5px';
-            width: var(--fraction-tooltip);
-            bottom: 0;
-            pointer-events: none;
-            transition: all 1s ease-out;
-            opacity: 0.8;
-
-            .innerdescription {
-                position: absolute;
-                transform: translate(-50%, -50%);
-                left: 50%;
-                top: 50%;
-                font-size: 25px;
-                font-weight: bold;
-                white-space: nowrap;
-                transition: all 1s ease-out;
-                text-shadow: 1px 1px 4px var(--color-plog-neutral);
-            }
-        }
-
-        &.expanded:not(.home) {
-            .description {
-                height: var(--size-tooltip);
-                width: 100%;
-                bottom: -15px;
-            }
-
-            padding-bottom: var(--size-tooltip);
-        }
-
         &.expanded.home {
             height: calc(100vh - var(--min-home-height));
-            padding-bottom: 0px;
         }
 
         &:not(.expanded) {
             height: var(--size-map-small);
-        }
-
-        &.home .description {
-            opacity: 0;
         }
 
         &.expanded {
@@ -197,10 +167,6 @@
             .map {
                 margin-left: -50%;
             }
-
-            .description .innerdescription {
-                text-shadow: none;
-            }
         }
 
         .mapframe {
@@ -208,6 +174,45 @@
             height: 100%;
             overflow: hidden;
             border-radius: 8px;
+        }
+
+        .map-description-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            pointer-events: none;
+            opacity: 1;
+            transition:
+                opacity 0.4s ease-out,
+                transform 0.4s ease-out;
+            background: linear-gradient(
+                to right,
+                var(--color-plog-neutral-8) 0%,
+                var(--color-plog-neutral-8) 40%,
+                transparent 85%
+            );
+
+            .map-description-text {
+                font-size: 24px;
+                font-weight: bold;
+                white-space: nowrap;
+                color: var(--color-plog-normal);
+            }
+
+            // Peek/open: fade out and drift down as the row takes over below.
+            &.is-hidden {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            &.empty {
+                opacity: 0;
+            }
         }
 
         .map {
