@@ -70,6 +70,8 @@ function newCenter(
 
 type MapProps = {
     expanded: boolean;
+    mapHeight?: number;
+    descriptionOverlay?: boolean;
     expand: () => void;
 };
 
@@ -83,7 +85,12 @@ type MapState = {
     center: Coordinates;
 };
 
-export default function ControlledMap({ expanded, expand }: MapProps) {
+export default function ControlledMap({
+    expanded,
+    mapHeight,
+    descriptionOverlay,
+    expand,
+}: MapProps) {
     const { entries, displayed, setDisplayed } = useContext(BookContext)!;
     const [size, setSize] = useState<Size>({ width: 450, height: 350 });
     const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -105,9 +112,9 @@ export default function ControlledMap({ expanded, expand }: MapProps) {
     const { center, zoom } = newCenter(entries, displayed, size);
 
     const theEntry = displayed.getEntry();
-    const description = theEntry
-        ? theEntry.getDaysSinceStart() + 1 + '.Tag | ' + theEntry.km + 'km'
-        : '';
+    const dayLabel = theEntry ? theEntry.getDaysSinceStart() + 1 + '.Tag' : '';
+    const kmLabel = theEntry ? theEntry.km + 'km' : '';
+    const hasEntry = theEntry != null;
 
     return (
         <>
@@ -118,22 +125,15 @@ export default function ControlledMap({ expanded, expand }: MapProps) {
                     (expanded ? 'expanded ' : '') +
                     (isHome ? 'home ' : '')
                 }
+                style={
+                    mapHeight !== undefined ? { height: mapHeight } : undefined
+                }
                 onClick={() => {
                     if (!expanded) {
                         expand();
                     }
                 }}
             >
-                <div
-                    className="description"
-                    style={{
-                        zIndex: 999,
-                    }}
-                >
-                    <div className="h-full relative">
-                        <span className="innerdescription">{description}</span>
-                    </div>
-                </div>
                 <div className="mapframe">
                     <div className="map">
                         <Map
@@ -185,6 +185,27 @@ export default function ControlledMap({ expanded, expand }: MapProps) {
                         </Map>
                     </div>
                 </div>
+                <div
+                    className={
+                        'map-description-overlay' +
+                        (descriptionOverlay ? '' : ' is-hidden') +
+                        (hasEntry ? '' : ' empty')
+                    }
+                >
+                    <span className="map-description-text">
+                        {dayLabel} | {kmLabel}
+                    </span>
+                </div>
+            </div>
+            <div
+                className={
+                    'map-description' +
+                    (descriptionOverlay ? ' is-collapsed' : '') +
+                    (hasEntry ? '' : ' empty')
+                }
+            >
+                <span className="day">{dayLabel}</span>
+                <span className="km">{kmLabel}</span>
             </div>
         </>
     );
